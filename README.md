@@ -1,1 +1,8 @@
 # video-streaming
+-------------------------------overview----------------------------------------
+First, the video element makes a request to the server, then the header provides the desired range of bytes from the video. For example, at the beginning of the video, the requested range would be from the 0th byte onwards, hence the 0-. The server will respond with a 206 HTTP status, indicating it is returning partial content with the proper header response, which includes the range and content length.
+The response headers indicate to the video element that the video is incomplete. As a result, the video element will play what it has downloaded so far. When this happens, the video element will continue making requests, and the cycle will continue until there are no bytes left.
+
+Application pros and cons
+Our streaming server will be fairly simple to implement. Essentially, we’re creating a file system and returning it back to the client. Our server will allow us to select timeframes throughout the video and decide how big of a payload to send back. For mine, I chose 1MB, but you have the freedom to play around with it.
+However, because of our app’s simplicity, the server and video player don’t work as well together as we would like. Essentially, the video player will just request the part of the video you’re on, without taking into account what you already requested. It’s likely that you’ll end up requesting some of the same resources over and over again.
