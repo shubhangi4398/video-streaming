@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Streaming with Node.js</title>
+</head>
+<body>
+  <video id="video" controls autoplay width="640" height="360"></video>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const video = document.getElementById('video');
+    const receivedImage = new Image();
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then((stream) => {
+        const mediaStream = new MediaStream();
+        mediaStream.addTrack(stream.getVideoTracks()[0]);
+        video.srcObject = mediaStream;
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 640;
+        canvas.height = 360;
+
+        setInterval(() => {
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = canvas.toDataURL('image/jpeg');
+          socket.emit('stream', imageData);
+        }, 1000 / 30); // Capture and emit an image every 1/30th of a second
+      })
+      .catch((error) => {
+        console.error('Error accessing webcam:', error);
+      });
+
+    socket.on('stream', (image) => {
+      receivedImage.src = image;
+    });
+  </script>
+</body>
+</html>
